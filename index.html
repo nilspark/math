@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>덧셈/뺄셈 트레이너</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #f7f8fc, #e4e9f0);
+      text-align: center;
+      margin: 0;
+      padding: 3em 1em;
+      color: #333;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2em;
+      font-size: 1.5em;
+      margin-bottom: 2em;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 0.5em 1.2em;
+      border: none;
+      border-radius: 8px;
+      background-color: #4a90e2;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #357ab8;
+    }
+    #timer, #counter {
+      padding: 0.3em 1em;
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      min-width: 120px;
+    }
+    .expression {
+      font-size: 8em;
+      font-weight: bold;
+      color: #222;
+      margin: 1em 0;
+      visibility: hidden;
+    }
+    .message {
+      font-size: 1.5em;
+      color: #888;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <button id="toggleBtn">+</button>
+    <div id="timer">00:00.000</div>
+    <div id="counter">0</div>
+  </div>
+  <div class="expression" id="expression">1 + 2</div>
+  <div class="message" id="message">시작하려면 스페이스바를 누르세요</div>
+
+  <script>
+    let isAddition = true;
+    let count = 0;
+    let startTime = null;
+    let intervalId = null;
+    let started = false;
+
+    const expressionEl = document.getElementById('expression');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const timerEl = document.getElementById('timer');
+    const counterEl = document.getElementById('counter');
+    const messageEl = document.getElementById('message');
+
+    function reset() {
+      count = 0;
+      started = false;
+      startTime = null;
+      clearInterval(intervalId);
+      timerEl.textContent = '00:00.000';
+      counterEl.textContent = '0';
+      expressionEl.style.visibility = 'hidden';
+      messageEl.textContent = '시작하려면 스페이스바를 누르세요';
+    }
+
+    function randomDigit() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function updateExpression() {
+      let a = randomDigit();
+      let b = randomDigit();
+      if (!isAddition && a < b) {
+        [a, b] = [b, a];
+      }
+      const op = isAddition ? '+' : '-';
+      expressionEl.textContent = `${a} ${op} ${b}`;
+    }
+
+    function updateTimer() {
+      if (!started || startTime === null) return;
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const minutes = String(Math.floor(elapsed / 60000)).padStart(2, '0');
+      const seconds = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+      const milliseconds = String(elapsed % 1000).padStart(3, '0');
+      timerEl.textContent = `${minutes}:${seconds}.${milliseconds}`;
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      isAddition = !isAddition;
+      toggleBtn.textContent = isAddition ? '+' : '-';
+      reset();
+    });
+
+    function handleAction() {
+      if (!started) {
+        started = true;
+        startTime = Date.now();
+        intervalId = setInterval(updateTimer, 31);
+        expressionEl.style.visibility = 'visible';
+        messageEl.textContent = '';
+        updateExpression();
+        return;
+      }
+
+      if (count < 100) {
+        count++;
+        counterEl.textContent = count;
+        updateExpression();
+        if (count === 100) {
+          clearInterval(intervalId);
+        }
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+
+    document.addEventListener('click', () => {
+      handleAction();
+    });
+
+    // 초기 설정
+    reset();
+  </script>
+</body>
+</html>
